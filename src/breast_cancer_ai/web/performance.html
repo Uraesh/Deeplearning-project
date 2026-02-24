@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OncoBreast AI - Dashboard Clinique Performance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="bg-orb orb-a"></div>
+  <div class="bg-orb orb-b"></div>
+
+  <main class="layout performance-layout">
+    <section class="hero reveal">
+      <p class="eyebrow">OncoBreast AI - Espace Medecins</p>
+      <h1>Dashboard Clinique des Performances</h1>
+      <p class="subtitle">
+        Vue dediee a l'equipe medicale: indicateurs de discrimination, robustesse inter-fold
+        et matrice de confusion en terminologie oncologique.
+      </p>
+      <div class="hero-meta">
+        <div class="meta-card">
+          <span class="meta-label">Version modele</span>
+          <strong id="perf-model-version">Chargement...</strong>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">Derniere mise a jour</span>
+          <strong id="perf-updated">-</strong>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">Source metriques</span>
+          <strong id="perf-source">-</strong>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <a href="/" class="btn ghost inline-link">Retour inference patient</a>
+        <a href="/docs" class="btn ghost inline-link">Swagger API</a>
+      </div>
+    </section>
+
+    <section class="dashboard reveal delay-1">
+      <div class="panel-head">
+        <h2>Indicateurs cles (cohorte test externe)</h2>
+        <span class="badge" id="perf-badge">Analyse en cours...</span>
+      </div>
+      <div class="kpi-grid">
+        <article class="kpi-card"><span>Sensibilite</span><strong id="kpi-test-sensitivity">-</strong></article>
+        <article class="kpi-card"><span>Specificite</span><strong id="kpi-test-specificity">-</strong></article>
+        <article class="kpi-card"><span>ROC AUC</span><strong id="kpi-test-roc-auc">-</strong></article>
+        <article class="kpi-card"><span>PR AUC</span><strong id="kpi-test-pr-auc">-</strong></article>
+        <article class="kpi-card"><span>Accuracy</span><strong id="kpi-test-accuracy">-</strong></article>
+        <article class="kpi-card"><span>Seuil clinique</span><strong id="kpi-threshold">-</strong></article>
+      </div>
+      <p id="perf-error" class="dashboard-error"></p>
+    </section>
+
+    <section class="dashboard reveal delay-2">
+      <div class="chart-grid">
+        <article class="chart-card">
+          <h3>Courbe animee AUC (ROC et PR) par cohorte</h3>
+          <div id="auc-curve" class="plot"></div>
+        </article>
+        <article class="chart-card">
+          <h3>Courbe animee Sensibilite vs Specificite</h3>
+          <div id="sens-spec-curve" class="plot"></div>
+        </article>
+        <article class="chart-card chart-card-wide">
+          <h3>Matrice de confusion clinique generale</h3>
+          <p class="chart-caption">
+            Reference: anatomopathologie. Decision systeme: triage oncologique (suspect malignite vs non suspect).
+          </p>
+          <div id="confusion-matrix" class="plot"></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="dashboard reveal delay-3">
+      <div class="chart-grid">
+        <article class="chart-card chart-card-wide">
+          <h3>Stabilite inter-fold (validation croisee)</h3>
+          <div id="fold-stability" class="plot"></div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script src="/static/performance.js"></script>
+</body>
+</html>

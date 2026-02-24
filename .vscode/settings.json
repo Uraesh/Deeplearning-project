@@ -1,0 +1,17 @@
+{
+  "chatgpt.openOnStartup": true,
+  "python.analysis.extraPaths": [
+    "./src"
+  ],
+  "python.analysis.ignore": [
+    "notebooks/**"
+  ],
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportMissingTypeStubs": "none"
+  },
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
+  "python-envs.defaultEnvManager": "ms-python.python:system"
+}

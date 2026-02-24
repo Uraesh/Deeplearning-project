@@ -1,0 +1,18 @@
+﻿services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: breast-cancer-api
+    ports:
+      - "8000:8000"
+    environment:
+      - MODEL_PATH=/app/models/latest/model.pt
+    volumes:
+      - ./models:/app/models
+    command: >
+      sh -c "if [ ! -f /app/models/latest/model.pt ]; then
+      python -m breast_cancer_ai.train --config configs/train_config.yaml;
+      fi &&
+      python -m breast_cancer_ai.api --host 0.0.0.0 --port 8000"
+    restart: unless-stopped

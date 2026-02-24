@@ -1,0 +1,6 @@
+[MASTER]
+init-hook=import sys; from pathlib import Path; sys.path.insert(0, str(Path().resolve() / "src"))
+ignore=.venv,.pytest_cache,__pycache__,models
+
+[FORMAT]
+max-line-length=100

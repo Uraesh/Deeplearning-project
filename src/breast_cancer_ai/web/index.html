@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OncoBreast AI Console - Inference</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="bg-orb orb-a"></div>
+  <div class="bg-orb orb-b"></div>
+
+  <main class="layout">
+    <section class="hero reveal">
+      <p class="eyebrow">Projet Deep Learning - Oncologie</p>
+      <h1>OncoBreast AI Console - Inference</h1>
+      <p class="subtitle">
+        Interface de triage clinique pour la detection du cancer du sein.
+        Version CPU-first, traceable, et orientee sensibilite.
+      </p>
+      <div class="hero-meta">
+        <div class="meta-card">
+          <span class="meta-label">Status API</span>
+          <strong id="status-text">Chargement...</strong>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">Version modele</span>
+          <strong id="model-version">-</strong>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">Seuil clinique</span>
+          <strong id="model-threshold">-</strong>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <a href="/performance-dashboard" class="btn ghost inline-link">Page performance medecins</a>
+        <a href="/docs" class="btn ghost inline-link">Swagger API</a>
+      </div>
+    </section>
+
+    <section class="panel reveal delay-1">
+      <div class="panel-head">
+        <h2>Inference Patient</h2>
+        <div class="actions">
+          <button id="fill-sample-btn" type="button" class="btn ghost">Remplir exemple</button>
+          <button id="clear-btn" type="button" class="btn ghost">Reinitialiser</button>
+        </div>
+      </div>
+      <p class="panel-text">
+        Les champs sont generes automatiquement a partir des features du modele charge.
+      </p>
+      <form id="predict-form" class="feature-grid"></form>
+      <button id="predict-btn" type="button" class="btn primary">Lancer la prediction</button>
+    </section>
+
+    <section class="result reveal delay-2">
+      <div class="result-head">
+        <h2>Resultat inference</h2>
+        <span id="risk-chip" class="risk-chip neutral">En attente</span>
+      </div>
+      <div class="result-grid">
+        <div class="result-card">
+          <span>Probabilite malignant</span>
+          <strong id="probability-value">-</strong>
+        </div>
+        <div class="result-card">
+          <span>Prediction</span>
+          <strong id="prediction-label">-</strong>
+        </div>
+        <div class="result-card">
+          <span>Request ID</span>
+          <strong id="request-id">-</strong>
+        </div>
+      </div>
+      <div class="report-actions">
+        <button id="download-report-btn" type="button" class="btn ghost" disabled>
+          Telecharger compte-rendu medical patient
+        </button>
+      </div>
+      <pre id="raw-response" class="raw-response">Aucune prediction pour le moment.</pre>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

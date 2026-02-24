@@ -1,0 +1,8 @@
+{
+  "training_signature": "fb06a5b88336acdb83e9b85691a59d4838717536b1c7164cadb8b7cc0d610512",
+  "model_version": "20260224T004529Z",
+  "created_at_utc": "2026-02-24T00:45:29.807637+00:00",
+  "run_dir": "models\\runs\\wisconsin_torch_20260224_004123",
+  "latest_model_path": "models\\latest\\model.pt",
+  "metrics_path": "models\\latest\\metrics.json"
+}

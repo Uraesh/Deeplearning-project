@@ -1,0 +1,34 @@
+﻿system:
+  seed: 42
+  num_threads: 4
+  cleanup_every_epoch: true
+
+dataset:
+  path: data.csv
+  target_col: diagnosis
+  id_col: id
+
+split:
+  test_size: 0.20
+
+model:
+  hidden_dims: [64, 32, 1]
+  dropout: 0.2
+  use_batch_norm: true
+
+training:
+  batch_size: 32
+  max_epochs: 220
+  learning_rate: 0.001
+  weight_decay: 0.0006
+  early_stopping_patience: 16
+  min_delta: 0.0001
+  sensitivity_target: 0.97
+  cv_folds: 5
+  scheduler_factor: 0.5
+  scheduler_patience: 6
+  min_learning_rate: 0.00001
+
+artifacts:
+  output_dir: models
+  run_name_prefix: wisconsin_torch
