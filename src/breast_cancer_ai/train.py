@@ -37,6 +37,33 @@ TensorBatch = tuple[torch.Tensor, torch.Tensor]
 BatchLoader = DataLoader[TensorBatch]
 
 
+def _print_epoch_log(
+    phase: str,
+    epoch: int,
+    max_epochs: int,
+    train_loss: float,
+    val_loss: float | None,
+    best_val_loss: float | None,
+    lr: float,
+) -> None:
+    """Print one compact epoch progress line."""
+    if val_loss is None:
+        print(
+            f"[{phase}] epoch {epoch:03d}/{max_epochs:03d} "
+            f"train_loss={train_loss:.6f} lr={lr:.6g}",
+            flush=True,
+        )
+        return
+
+    best_value = "-" if best_val_loss is None else f"{best_val_loss:.6f}"
+    print(
+        f"[{phase}] epoch {epoch:03d}/{max_epochs:03d} "
+        f"train_loss={train_loss:.6f} val_loss={val_loss:.6f} "
+        f"best_val={best_value} lr={lr:.6g}",
+        flush=True,
+    )
+
+
 def _create_run_dir(output_dir: Path, prefix: str) -> Path:
     """Create a timestamped run directory under the artifact root."""
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
@@ -221,6 +248,9 @@ def _train_with_early_stopping(
     y_train: IntArray,
     x_val: FloatArray,
     y_val: IntArray,
+    *,
+    show_epochs: bool = False,
+    phase: str = "train",
 ) -> tuple[TabularMLP, int, float]:
     """Train one fold with early stopping and LR scheduling."""
     train_loader = _make_loader(x_train, y_train, cfg.training.batch_size, shuffle=True)
@@ -253,6 +283,8 @@ def _train_with_early_stopping(
 
     for epoch in range(1, cfg.training.max_epochs + 1):
         model.train()
+        train_loss_total = 0.0
+        train_seen = 0
         for batch_x, batch_y in train_loader:
             optimizer.zero_grad(set_to_none=True)
             logits = model(batch_x)
@@ -260,8 +292,23 @@ def _train_with_early_stopping(
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
+            batch_size = int(len(batch_y))
+            train_loss_total += float(loss.item()) * batch_size
+            train_seen += batch_size
 
         val_loss, _, _ = _evaluate(model, val_loader, criterion)
+        avg_train_loss = train_loss_total / max(1, train_seen)
+        current_lr = float(optimizer.param_groups[0]["lr"])
+        if show_epochs:
+            _print_epoch_log(
+                phase=phase,
+                epoch=epoch,
+                max_epochs=cfg.training.max_epochs,
+                train_loss=avg_train_loss,
+                val_loss=val_loss,
+                best_val_loss=best_val_loss if best_val_loss != float("inf") else None,
+                lr=current_lr,
+            )
         scheduler.step(val_loss)
 
         if val_loss < (best_val_loss - cfg.training.min_delta):
@@ -276,6 +323,12 @@ def _train_with_early_stopping(
             cleanup_memory()
 
         if patience_count >= cfg.training.early_stopping_patience:
+            if show_epochs:
+                print(
+                    f"[{phase}] early stopping at epoch={epoch} "
+                    f"(best_epoch={best_epoch}, best_val={best_val_loss:.6f})",
+                    flush=True,
+                )
             break
 
     model.load_state_dict(best_state)
@@ -288,6 +341,9 @@ def _train_fixed_epochs(
     x_train: FloatArray,
     y_train: IntArray,
     epochs: int,
+    *,
+    show_epochs: bool = False,
+    phase: str = "final_train",
 ) -> TabularMLP:
     """Train final model for a fixed number of epochs."""
     model = _build_model(cfg, input_dim=x_train.shape[1])
@@ -305,8 +361,10 @@ def _train_fixed_epochs(
 
     train_loader = _make_loader(x_train, y_train, cfg.training.batch_size, shuffle=True)
 
-    for _ in range(max(1, epochs)):
+    for epoch in range(1, max(1, epochs) + 1):
         model.train()
+        train_loss_total = 0.0
+        train_seen = 0
         for batch_x, batch_y in train_loader:
             optimizer.zero_grad(set_to_none=True)
             logits = model(batch_x)
@@ -314,6 +372,21 @@ def _train_fixed_epochs(
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
+            batch_size = int(len(batch_y))
+            train_loss_total += float(loss.item()) * batch_size
+            train_seen += batch_size
+
+        if show_epochs:
+            current_lr = float(optimizer.param_groups[0]["lr"])
+            _print_epoch_log(
+                phase=phase,
+                epoch=epoch,
+                max_epochs=max(1, epochs),
+                train_loss=(train_loss_total / max(1, train_seen)),
+                val_loss=None,
+                best_val_loss=None,
+                lr=current_lr,
+            )
 
         if cfg.system.cleanup_every_epoch:
             cleanup_memory()
@@ -326,6 +399,8 @@ def _cross_validated_oof_predictions(
     cfg: TrainConfig,
     x_train_val_frame: pd.DataFrame,
     y_train_val_series: pd.Series,
+    *,
+    show_epochs: bool = False,
 ) -> tuple[FloatArray, list[dict[str, object]], int]:
     """Compute out-of-fold probabilities and fold diagnostics."""
     y_values = np.asarray(y_train_val_series.to_numpy(dtype=np.int64), dtype=np.int64)
@@ -367,6 +442,8 @@ def _cross_validated_oof_predictions(
             y_fit,
             x_val,
             y_val,
+            show_epochs=show_epochs,
+            phase=f"cv_fold_{fold_idx}",
         )
         val_prob = _predict_proba(model, x_val)
         oof_prob[val_idx] = val_prob
@@ -399,7 +476,11 @@ def _cross_validated_oof_predictions(
     return np.asarray(oof_prob, dtype=np.float64), fold_reports, final_epochs
 
 
-def run_training(config_path: str, force_retrain: bool = False) -> dict[str, object]:
+def run_training(
+    config_path: str,
+    force_retrain: bool = False,
+    show_epochs: bool = False,
+) -> dict[str, object]:
     """Run full training pipeline and persist model artifacts."""
     cfg = load_train_config(config_path)
     set_seed(cfg.system.seed)
@@ -437,6 +518,7 @@ def run_training(config_path: str, force_retrain: bool = False) -> dict[str, obj
         cfg=cfg,
         x_train_val_frame=x_train_val_frame,
         y_train_val_series=y_train_val_series,
+        show_epochs=show_epochs,
     )
     y_train_val_np = np.asarray(
         y_train_val_series.to_numpy(dtype=np.int64), dtype=np.int64
@@ -472,6 +554,8 @@ def run_training(config_path: str, force_retrain: bool = False) -> dict[str, obj
         x_train=x_train_val,
         y_train=y_train_val_np,
         epochs=final_training_epochs,
+        show_epochs=show_epochs,
+        phase="final_train",
     )
 
     train_val_prob = _predict_proba(final_model, x_train_val)
@@ -600,9 +684,18 @@ def main() -> None:
         action="store_true",
         help="Force a new training run even when cache signature matches.",
     )
+    parser.add_argument(
+        "--show-epochs",
+        action="store_true",
+        help="Print epoch-by-epoch training progress in terminal.",
+    )
     args = parser.parse_args()
 
-    result = run_training(config_path=args.config, force_retrain=args.force_retrain)
+    result = run_training(
+        config_path=args.config,
+        force_retrain=args.force_retrain,
+        show_epochs=args.show_epochs,
+    )
     print(json.dumps(result, indent=2))
 
 

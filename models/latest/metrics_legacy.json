@@ -1,0 +1,69 @@
+﻿{
+    "model_version":  "20260224T135220Z",
+    "created_at_utc":  "2026-02-24T13:52:20.055837+00:00",
+    "threshold":  0.290783,
+    "threshold_details":  {
+                              "reason":  "target_sensitivity_met",
+                              "target_sensitivity":  0.97,
+                              "candidate_count":  243,
+                              "chosen_metrics":  {
+                                                     "threshold":  0.290783,
+                                                     "tn":  220,
+                                                     "fp":  66,
+                                                     "fn":  5,
+                                                     "tp":  165,
+                                                     "sensitivity":  0.9705882352941176,
+                                                     "specificity":  0.7692307692307693,
+                                                     "ppv":  0.7142857142857143,
+                                                     "npv":  0.9777777777777777,
+                                                     "accuracy":  0.8442982456140351,
+                                                     "roc_auc":  0.9800699300699302,
+                                                     "pr_auc":  0.9779307522337527,
+                                                     "brier_score":  0.06499584944003337
+                                                 }
+                          },
+    "validation_metrics":  {
+                               "threshold":  0.290783,
+                               "tn":  220,
+                               "fp":  66,
+                               "fn":  5,
+                               "tp":  165,
+                               "sensitivity":  0.9705882352941176,
+                               "specificity":  0.7692307692307693,
+                               "ppv":  0.7142857142857143,
+                               "npv":  0.9777777777777777,
+                               "accuracy":  0.8442982456140351,
+                               "roc_auc":  0.9800699300699302,
+                               "pr_auc":  0.9779307522337527,
+                               "brier_score":  0.06499584944003337
+                           },
+    "test_metrics":  {
+                         "threshold":  0.290783,
+                         "tn":  65,
+                         "fp":  6,
+                         "fn":  3,
+                         "tp":  39,
+                         "sensitivity":  0.9285714285714286,
+                         "specificity":  0.9154929577464789,
+                         "ppv":  0.8666666666666667,
+                         "npv":  0.9558823529411765,
+                         "accuracy":  0.9203539823008849,
+                         "roc_auc":  0.9912810194500334,
+                         "pr_auc":  0.9872669459799115,
+                         "brier_score":  0.04812136900844681
+                     },
+    "epochs_trained":  185,
+    "sample_counts":  {
+                          "train":  342,
+                          "val":  114,
+                          "test":  113
+                      },
+    "dropped_columns":  {
+                            "unnamed":  [
+                                            "Unnamed:_32"
+                                        ],
+                            "all_nan":  [
+
+                                        ]
+                        }
+}
