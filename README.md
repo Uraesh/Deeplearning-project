@@ -2,7 +2,7 @@
 
 Projet de fin de module apprentissage profond, construit comme un mini-projet hospitalier:
 pipeline d'entrainement CPU-first en PyTorch, API FastAPI, interface web de demonstration,
-gouvernance des donnees et logique de mise en production.
+gouvernance des donnees et logique de mise en production. https://deeplearning-project-7wed.onrender.com/
 
 ## 1. Objectif du projet
 
